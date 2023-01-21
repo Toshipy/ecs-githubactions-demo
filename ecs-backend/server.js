@@ -4,7 +4,7 @@ const express = require('express');
 
 const PORT = 8070;
 const HOST = '0.0.0.0';
-const REST_URL = 'http://ecs-api.ecs.internal:8080';
+const REST_URL = 'http://ecs-service-restapi.ecs-internal:8080';
 const REST_API_PATH = '/api/v1/date';
 
 const app = express();
