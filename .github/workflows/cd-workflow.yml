@@ -75,8 +75,8 @@ jobs:
 
     - name: Deploy to ECS
       run: |
-        aws ecs update-service --service $ECS_WEBAPP_SERVICE --cluster ecs-cluster --force-new-deployment
-        aws ecs update-service --service $ECS_RESTAPI_SERVICE --cluster ecs-cluster --force-new-deployment
+        aws ecs update-service --service $ECS_WEBAPP_SERVICE --cluster 0120-ecs --force-new-deployment
+        aws ecs update-service --service $ECS_RESTAPI_SERVICE --cluster 0120-ecs --force-new-deployment
 
     - name: Success
       uses: rtCamp/action-slack-notify@v2.0.2
