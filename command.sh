@@ -23,3 +23,5 @@ docker images |grep 851859251602
 #4
 docker push 851859251602.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-web:latest
 docker push 851859251602.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-web:1.0.0
+
+https://hooks.slack.com/services/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
