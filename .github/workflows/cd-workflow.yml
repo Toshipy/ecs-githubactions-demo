@@ -10,7 +10,7 @@ env:
   AWS_REGION: ap-northeast-1
   ECS_WEBAPP_SERVICE: ecs-web-app
   ECS_RESTAPI_SERVICE: ecs-restapi
-  WEBAPP_CONTAINER_NAME: ecs-web-app
+  WEBAPP_CONTAINER_NAME: ecs-web-container
   BACKEND_CONTAINER_NAME: ecs-backend
   RESTAPI_CONTAINER_NAME: ecs-restapi
   WEBAPP_TAG: 1.0.0
