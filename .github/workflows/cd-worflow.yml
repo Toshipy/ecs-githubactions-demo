@@ -3,7 +3,7 @@ name: Deploy flow for Amazon ECS
 on:
   pull_request:
     branches:
-      -main
+      - main
     types: [closed]
 
 env:
