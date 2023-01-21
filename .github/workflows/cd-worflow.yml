@@ -1,0 +1,104 @@
+name: Deploy flow for Amazon ECS
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECS_WEBAPP_SERVICE: ecs-web-app
+  ECS_RESTAPI_SERVICE: ecs-restapi
+  WEBAPP_CONTAINER_NAME: ecs-web-app
+  BACKEND_CONTAINER_NAME: ecs-backend
+  RESTAPI_CONTAINER_NAME: ecs-api
+  WEBAPP_TAG: 1.0.0
+  BACKEND_TAG: 1.0.0
+  RESTAPI_TAG: 1.0.0
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secret.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key-id: ${{ secret.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: webapp push to ECR
+      id: build-image-webapp
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        cd ecs-web-app
+        docker build -t $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG .
+        docker tag $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:latest
+        docker push $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG
+        docker push $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:latest
+
+    - name: backend push to ECR
+      id: build-image-backend
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        cd ecs-backend
+        docker build -t $ECR_REGISTRY/$BACKEND_CONTAINER_NAME:$BACKEND_TAG .
+        docker tag $ECR_REGISTRY/$BACKEND_CONTAINER_NAME:$BACKEND_TAG $ECR_REGISTRY/$BACKEND_CONTAINER_NAME:latest
+        docker push $ECR_REGISTRY/$BACKEND_CONTAINER_NAME:$BACKEND_TAG
+        docker push $ECR_REGISTRY/$BACKEND_CONTAINER_NAME:latest
+
+    - name: restapi push to ECR
+      id: build-image-backend
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        cd ecs-api
+        docker build -t $ECR_REGISTRY/$RESTAPICONTAINER_NAME:$RESTAPITAG .
+        docker tag $ECR_REGISTRY/$RESTAPICONTAINER_NAME:$RESTAPITAG $ECR_REGISTRY/$RESTAPICONTAINER_NAME:latest
+        docker push $ECR_REGISTRY/$RESTAPICONTAINER_NAME:$RESTAPITAG
+        docker push $ECR_REGISTRY/$RESTAPICONTAINER_NAME:latest
+
+
+    - name: Deploy to ECS
+      run: |
+        aws ecs update-service --service $ECS_WEBAPP_SERVICE --cluster ecs-cluster --force-new-deployment
+        aws ecs update-service --service $ECS_RESTAPI_SERVICE --cluster ecs-cluster --force-new-deployment
+
+
+    - name: Success
+      uses: rtCamp/action-slack-notify@v2.0.2
+      if: success()
+      env:
+        SLACK_TITLE: Deploy flow/ success
+        SLACK_COLOR: good
+        SLACK_MESSAGE: Message for success
+
+    - name: Failure
+      uses: rtCamp/action-slack-notify@v2.0.2
+      if: failure()
+      env:
+        SLACK_TITLE: Deploy flow/ failure
+        SLACK_COLOR: danger
+        SLACK_MESSAGE: Message for failure
+
+    - name: Cancel
+      uses: rtCamp/action-slack-notify@v2.0.2
+      if: cancelled()
+      env:
+        SLACK_TITLE: Deploy flow/ cancel
+        SLACK_COLOR: danger
+        SLACK_MESSAGE: Message for cancel
