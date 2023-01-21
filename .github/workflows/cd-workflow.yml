@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECS_WEBAPP_SERVICE: ecs-web-app
+  ECS_WEBAPP_SERVICE: ecs-webapp
   ECS_RESTAPI_SERVICE: ecs-restapi
   WEBAPP_CONTAINER_NAME: ecs-web-app
   BACKEND_CONTAINER_NAME: ecs-backend
